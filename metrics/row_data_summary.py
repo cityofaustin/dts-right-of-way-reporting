@@ -153,7 +153,13 @@ def main():
     s3_client = boto3.client(
         "s3", aws_access_key_id=AWS_ACCESS_ID, aws_secret_access_key=AWS_PASS
     )
-    soda = Socrata(SO_WEB, SO_TOKEN, username=SO_KEY, password=SO_SECRET, timeout=500,)
+    soda = Socrata(
+        SO_WEB,
+        SO_TOKEN,
+        username=SO_KEY,
+        password=SO_SECRET,
+        timeout=500,
+    )
 
     # Load in data from S3
     dfs = []
@@ -168,6 +174,7 @@ def main():
     weekly = socrata_columns(weekly)
     # Upload to socrata
     df_to_socrata(soda, weekly)
+
 
 if __name__ == "__main__":
     main()

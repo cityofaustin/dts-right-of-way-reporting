@@ -1,8 +1,8 @@
 FILES = [
     {
-        "id": 4477152411314052, # Smartsheet sheet ID
-        "name": "Commercial DS Permit Requests", # File name used in S3
-        "date_column": "Date Created", # Date column name in the smartsheet
+        "id": 4477152411314052,  # Smartsheet sheet ID
+        "name": "Commercial DS Permit Requests",  # File name used in S3
+        "date_column": "Date Created",  # Date column name in the smartsheet
     },
     {
         "id": 1926715770464132,

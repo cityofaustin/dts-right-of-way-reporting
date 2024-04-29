@@ -43,21 +43,26 @@ def s3_to_df(s3, filename):
     response = s3.get_object(Bucket=BUCKET, Key=filename)
     return (
         pd.read_csv(response.get("Body")),
-        response["LastModified"].astimezone(pytz.timezone(tz)).strftime("%Y-%m-%dT%H:%M:00.000"),
+        response["LastModified"]
+        .astimezone(pytz.timezone(tz))
+        .strftime("%Y-%m-%dT%H:%M:00.000"),
     )
+
 
 def prepare_data(df, modified_date):
     # Rotate our dataframe to have the columns be the permit type
     df = pd.pivot_table(df, columns="FOLDERTYPE")
     # Create published date column
-    df['published_date'] = modified_date
+    df["published_date"] = modified_date
     return df
+
 
 def socrata_columns(df):
     # Renames a dataframe's columns to align with what Socrata is expecting
     df.columns = [c.lower() for c in df.columns]
     df.columns = [c.replace(" ", "_") for c in df.columns]
     return df
+
 
 def df_to_socrata(soda, df):
     """
@@ -72,11 +77,18 @@ def df_to_socrata(soda, df):
     payload = df.to_dict("records")
     soda.upsert(DATASET, payload)
 
+
 def main():
     s3_client = boto3.client(
         "s3", aws_access_key_id=AWS_ACCESS_ID, aws_secret_access_key=AWS_PASS
     )
-    soda = Socrata(SO_WEB, SO_TOKEN, username=SO_KEY, password=SO_SECRET, timeout=500,)
+    soda = Socrata(
+        SO_WEB,
+        SO_TOKEN,
+        username=SO_KEY,
+        password=SO_SECRET,
+        timeout=500,
+    )
 
     # Get data from S3 bucket and the time it was published
     df, time = s3_to_df(s3_client, "active_permits.csv")
@@ -86,6 +98,7 @@ def main():
     df = socrata_columns(df)
     # Upsert to socrata
     df_to_socrata(soda, df)
+
 
 if __name__ == "__main__":
     main()

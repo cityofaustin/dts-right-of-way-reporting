@@ -20,7 +20,9 @@ BUCKET = os.getenv("BUCKET_NAME")
 
 def download_file(smart, id, temp_dir, name):
     smart.Sheets.get_sheet_as_csv(
-        id, download_path=temp_dir.name, alternate_file_name=f"{name}.csv",
+        id,
+        download_path=temp_dir.name,
+        alternate_file_name=f"{name}.csv",
     )
 
 
@@ -68,6 +70,7 @@ def main():
 
     # Delete temporary directory
     temp_dir.cleanup()
+
 
 if __name__ == "__main__":
     main()
