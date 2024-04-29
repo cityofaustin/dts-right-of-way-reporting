@@ -6,6 +6,10 @@ SO_SECRET=
 SO_TOKEN=
 SO_WEB=
 
+# Socrata Dataset IDs
+WEEK_DATASET=ij2v-mrv3
+ACTIVE_DATASET=hyc6-zz9w
+
 # Smartsheet
 SMARTSHEET_ACCESS_TOKEN=
 
