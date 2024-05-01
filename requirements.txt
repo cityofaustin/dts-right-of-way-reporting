@@ -1,0 +1,6 @@
+pandas==1.2.*
+boto3==1.19.*
+sodapy==2.1.*
+smartsheet-python-sdk==3.0.*
+pytz==2024.1
+oracledb==2.1.*
