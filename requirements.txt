@@ -1,4 +1,4 @@
-pandas==1.2.*
+pandas==2.1.*
 boto3==1.19.*
 sodapy==2.1.*
 smartsheet-python-sdk==3.0.*

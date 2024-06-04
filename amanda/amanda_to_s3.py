@@ -116,7 +116,7 @@ parser.add_argument(
     "--query",
     choices=list(QUERIES.keys()),
     required=True,
-    help="Name of the query defined by the dict at the top of this script. Ex: applications_received",
+    help="Name of the query defined in queries.py. Ex: applications_received",
 )
 
 args = parser.parse_args()
