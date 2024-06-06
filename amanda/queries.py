@@ -118,7 +118,7 @@ QUERIES = {
         LEFT OUTER JOIN (
         SELECT
             fp.FOLDERRSN,
-            max(fpa.ATTEMPTDATE) AS ATTDATE -- Getting most recent web acceptance
+            min(fpa.ATTEMPTDATE) AS ATTDATE -- Getting latest web acceptance
         FROM
             FOLDERPROCESS fp
             LEFT OUTER JOIN FOLDERPROCESSATTEMPT fpa ON fpa.PROCESSRSN = fp.PROCESSRSN
@@ -130,7 +130,7 @@ QUERIES = {
         LEFT OUTER JOIN (
         SELECT
             fp.FOLDERRSN,
-            max(fpa.ATTEMPTDATE) AS ATTDATE -- Getting most recent completed distribution 
+            min(fpa.ATTEMPTDATE) AS ATTDATE -- Getting latest completed distribution 
         FROM
             FOLDERPROCESS fp
             LEFT OUTER JOIN FOLDERPROCESSATTEMPT fpa ON fpa.PROCESSRSN = fp.PROCESSRSN
