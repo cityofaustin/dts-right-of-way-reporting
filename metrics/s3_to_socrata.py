@@ -30,7 +30,7 @@ DATASET = os.getenv("SO_DATASET")
 
 def download_csv(file_name):
     """
-    downloads the CSV file from S3 and returns it as a list of dictonaries
+    downloads the CSV file from S3 and returns it as a list of dictionaries
     """
     logger.info(f"Downloading csv file from S3: {file_name}")
     s3_client = boto3.client(
@@ -45,7 +45,7 @@ def download_csv(file_name):
 
 def cleanup_empty_strings(data):
     """
-    Replaces emptry string with None in our list of dictonaries
+    Replaces empty string with None in our list of dictionaries
     """
     for row in data:
         for key in row:
