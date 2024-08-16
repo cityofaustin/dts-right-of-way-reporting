@@ -155,4 +155,81 @@ QUERIES = {
         f.FOLDERTYPE in('LM') -- Land Management folder type only
         AND f.STATUSCODE NOT in(56050) -- Remove VOID status
     """,
+    "lde_site_plan_reviews":
+    """
+    SELECT
+        f.FOLDERRSN,
+        f.REFERENCEFILE,
+        f.FOLDERNAME,
+        f.SUBCODE,
+        sub.SUBDESC,
+        fp.PROCESSRSN,
+        f.FOLDERTYPE,
+        vs.STATUSDESC,
+        f.FOLDERCONDITION,
+        TO_CHAR(fp.STARTDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as START_DATE,
+        TO_CHAR(fp.ENDDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as END_DATE,
+        TO_CHAR(fp.SCHEDULEDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as TO_START,
+        TO_CHAR(fp.SCHEDULEENDDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as TO_END
+    FROM
+        FOLDER f
+        LEFT OUTER JOIN FOLDERPROCESS fp ON f.FOLDERRSN = fp.FOLDERRSN
+        left outer JOIN VALIDSUB sub on sub.SUBCODE = f.SUBCODE
+        left outer JOIN VALIDSTATUS vs on vs.STATUSCODE = f.statuscode
+    WHERE
+        fp.PROCESSCODE = 51212
+        and(f.FOLDERTYPE = 'SP'
+            OR f.FOLDERTYPE = 'SC'
+            or(f.FOLDERTYPE = 'DA'
+                AND f.SUBCODE = 51315))
+    """,
+    "lde_site_plan_revisions":
+    """
+    SELECT
+        f.FOLDERTYPE,
+        f.FOLDERRSN,
+        f.REFERENCEFILE,
+        f.FOLDERNAME,
+        vu.USERNAME AS REVIEWER,
+        fp.PROCESSRSN,
+        vp.PROCESSDESC AS PROCESS_NAME,
+        TO_CHAR(fp.STARTDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as START_DATE,
+        TO_CHAR(fp.ENDDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as END_DATE,
+        TO_CHAR(fp.SCHEDULEDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as TO_START,
+        TO_CHAR(fp.SCHEDULEENDDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as TO_END,
+        vps.STATUSDESC PROCESS_STATUS,
+        ROW_NUMBER() OVER (PARTITION BY f.FOLDERRSN,
+            fp.PROCESSCODE ORDER BY f.FOLDERRSN,
+            fp.PROCESSCODE) cyclenumber,
+        pi.PROPINFOVALUE CouncilDistrict
+    FROM
+        folder f
+        JOIN folderprocess fp ON fp.FOLDERRSN = f.FOLDERRSN
+            AND fp.PROCESSCODE IN(51212)
+        JOIN validprocess vp ON vp.PROCESSCODE = fp.PROCESSCODE
+        LEFT JOIN validuser vu ON vu.USERID = fp.ASSIGNEDUSER
+        JOIN validprocessstatus vps ON vps.STATUSCODE = fp.STATUSCODE
+        JOIN propertyinfo pi ON pi.PROPERTYRSN = f.PROPERTYRSN
+            AND pi.PROPERTYINFOCODE = 52026 --Propertyinfo-Council District
+    GROUP BY
+        f.FOLDERTYPE,
+        vp.PROCESSDESC,
+        f.FOLDERRSN,
+        f.REFERENCEFILE,
+        f.FOLDERNAME,
+        fp.PROCESSCODE,
+        fp.PROCESSRSN,
+        vu.USERNAME,
+        fp.SCHEDULEDATE,
+        fp.SCHEDULEENDDATE,
+        fp.STARTDATE,
+        fp.ENDDATE,
+        vps.STATUSDESC,
+        pi.PROPINFOVALUE
+    ORDER BY
+        vu.USERNAME,
+        f.FOLDERTYPE,
+        vp.PROCESSDESC,
+        fp.PROCESSRSN
+    """
 }
