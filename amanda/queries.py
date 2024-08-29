@@ -155,39 +155,16 @@ QUERIES = {
         f.FOLDERTYPE in('LM') -- Land Management folder type only
         AND f.STATUSCODE NOT in(56050) -- Remove VOID status
     """,
-    "lde_site_plan_reviews":
-    """
-    SELECT
-        f.FOLDERRSN,
-        f.REFERENCEFILE,
-        f.FOLDERNAME,
-        f.SUBCODE,
-        sub.SUBDESC,
-        fp.PROCESSRSN,
-        f.FOLDERTYPE,
-        vs.STATUSDESC,
-        f.FOLDERCONDITION,
-        TO_CHAR(fp.STARTDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as START_DATE,
-        TO_CHAR(fp.ENDDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as END_DATE,
-        TO_CHAR(fp.SCHEDULEDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as TO_START,
-        TO_CHAR(fp.SCHEDULEENDDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as TO_END
-    FROM
-        FOLDER f
-        LEFT OUTER JOIN FOLDERPROCESS fp ON f.FOLDERRSN = fp.FOLDERRSN
-        left outer JOIN VALIDSUB sub on sub.SUBCODE = f.SUBCODE
-        left outer JOIN VALIDSTATUS vs on vs.STATUSCODE = f.statuscode
-    WHERE
-        fp.PROCESSCODE = 51212
-        and(f.FOLDERTYPE = 'SP'
-            OR f.FOLDERTYPE = 'SC'
-            or(f.FOLDERTYPE = 'DA'
-                AND f.SUBCODE = 51315))
-    """,
     "lde_site_plan_revisions":
     """
     SELECT
         f.FOLDERTYPE,
+        f.FOLDERREVISION,
         f.FOLDERRSN,
+        f.SUBCODE,
+        sub.SUBDESC,
+        vs.STATUSDESC,
+        f.FOLDERCONDITION,
         f.REFERENCEFILE,
         f.FOLDERNAME,
         vu.USERNAME AS REVIEWER,
@@ -211,8 +188,11 @@ QUERIES = {
         JOIN validprocessstatus vps ON vps.STATUSCODE = fp.STATUSCODE
         JOIN propertyinfo pi ON pi.PROPERTYRSN = f.PROPERTYRSN
             AND pi.PROPERTYINFOCODE = 52026 --Propertyinfo-Council District
+        left outer JOIN VALIDSUB sub on sub.SUBCODE = f.SUBCODE
+        left outer JOIN VALIDSTATUS vs on vs.STATUSCODE = f.statuscode
     GROUP BY
         f.FOLDERTYPE,
+        f.FOLDERREVISION,
         vp.PROCESSDESC,
         f.FOLDERRSN,
         f.REFERENCEFILE,
@@ -225,7 +205,11 @@ QUERIES = {
         fp.STARTDATE,
         fp.ENDDATE,
         vps.STATUSDESC,
-        pi.PROPINFOVALUE
+        pi.PROPINFOVALUE,
+        f.SUBCODE,
+        sub.SUBDESC,
+        vs.STATUSDESC,
+        f.FOLDERCONDITION
     ORDER BY
         vu.USERNAME,
         f.FOLDERTYPE,
