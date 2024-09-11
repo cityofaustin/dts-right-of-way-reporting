@@ -12,6 +12,16 @@ AMANDA is the backend system that underlies the [Austin Build + Connect](https:/
 
 `$ python amanda/amanda_to_s3.py --query applications_received`
 
+### Queries
+
+- `applications_received`: Gets the count of the number of right of way (ROW) permits received by day and folder type.
+- `active_permits`: Gets the current number of active ROW permits by type.
+- `issued_permits`: Gets the count of the number ROW permits issued by day and folder type.
+- `review_time`: Gets a list of dates of different processes of a RW permit's review timeline.
+- `ex_permits_issued`: Gets the list of EX permits and their indate and issuedate
+- `license_agreements_timeline`: Gets a list of license reviews and a series of dates of review completion dates. 
+- `lde_site_plan_revisions`: Gets a list of land development engineering reviews and key dates for reviews and their due dates.
+
 ## Smartsheet
 
 [Smartsheet](https://www.smartsheet.com/) is an additional tool the ROW team uses to manage some types of permits. `smartsheet_to_s3.py` downloads all of the data from the predefined list of sheets in `sheets.py` and stores the data as a .csv file in an AWS S3 bucket. There are no parameters for this script.
