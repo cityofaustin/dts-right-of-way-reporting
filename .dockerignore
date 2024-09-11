@@ -4,3 +4,5 @@
 env_file
 /.idea
 *.pyc
+/docs
+/.github
