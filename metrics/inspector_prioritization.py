@@ -2,10 +2,14 @@ import boto3
 import pandas as pd
 import numpy as np
 from sodapy import Socrata
+from arcgis.gis import GIS
+from arcgis.features import FeatureLayer
+from arcgis.geometry.filters import intersects
+
 
 import os
 
-from config import DAPCZ_SHAPE
+from config import DAPCZ_SHAPE, SEGMENTS_FEATURE_SERVICE_URL, DAPCZ_FEATURE_SERVICE_URL, ROW_INSPECTOR_SERVICE_URL
 
 # AWS Credentials
 AWS_ACCESS_ID = os.getenv("EXEC_DASH_ACCESS_ID")
@@ -14,6 +18,10 @@ BUCKET = os.getenv("BUCKET_NAME")
 
 # Socrata Credentials
 SO_TOKEN = os.getenv("SO_TOKEN")
+
+# AGOL Credentials
+AGOL_USERNAME = os.getenv("AGOL_USERNAME")
+AGOL_PASSWORD = os.getenv("AGOL_PASSWORD")
 
 PERMITS_FILE = "row_inspector_permit_list.csv"
 SEGMENTS_FILE = "row_inspector_segment_list.csv"
@@ -83,38 +91,44 @@ def batch_list(data, batch_size=100):
         yield data[i: i + batch_size]
 
 
-def retrieve_road_segment_data(segments):
+def retrieve_road_segment_data(segments, gis):
+    segments_layer = FeatureLayer(SEGMENTS_FEATURE_SERVICE_URL, gis)
     segment_ids = list(segments["PROPERTYRSN"].unique())
     segment_batches = batch_list(segment_ids)
     segment_data = []
     for segment_batch in segment_batches:
         segment_batch = ", ".join(map(str, segment_batch))
-        client = Socrata("data.austintexas.gov", app_token=SO_TOKEN)
-        segment_data += client.get(
-            "8hf2-pdmb", where=f"segment_id in ({segment_batch})", limit=999999
-        )
-    segment_data = pd.DataFrame(segment_data)
-    segment_data["segment_id"] = segment_data["segment_id"].astype(int)
-    segment_data["road_class"] = segment_data["road_class"].astype(int)
+        query_result = segments_layer.query(where=f"segment_id in ({segment_batch})", out_fields="*",
+                                            return_geometry=True)
+        segment_data.append(query_result.df)
+    segment_data = pd.concat(segment_data)
     segments = segments.merge(
-        segment_data, left_on="PROPERTYRSN", right_on="segment_id", how="inner"
+        segment_data, left_on="PROPERTYRSN", right_on="SEGMENT_ID", how="inner"
     )
 
     # Flagging segments if they are in the DAPCZ for later scoring
-    dapcz_segments = retrieve_dapcz_segments(client)
+    dapcz_segments = retrieve_dapcz_segments(gis, segments_layer)
     segments["is_dapcz"] = segments["segment_id"].isin(dapcz_segments)
+
+    # TODO: Tagging segments with the appropriate ROW inspector zone
+
     return segments
 
 
-def retrieve_dapcz_segments(client):
+def retrieve_dapcz_segments(gis, segments_layer):
     """
     Gets the list of street segments within the Downtown Project Coordination Zone (DAPCZ).
     DAPCZ_SHAPE is an approximation of a more detailed geometry.
     """
-    dapcz_segments = client.get(
-        "8hf2-pdmb", select="segment_id", where=f'intersects(the_geom, "{DAPCZ_SHAPE}")', limit=999999
-    )
-    return [int(i["segment_id"]) for i in dapcz_segments]
+    dapcz_features = FeatureLayer(DAPCZ_FEATURE_SERVICE_URL, gis)
+    dapcz_features = dapcz_features.query(where="1=1", return_geometry=True)
+    dapcz_segments = []
+    for polygon in dapcz_features.features:
+        filter = intersects(polygon.geometry)
+        response = segments_layer.query(geometry_filter=filter, out_fields="SEGMENT_ID")
+        dapcz_segments.append(response.df)
+    dapcz_segments = pd.concat(dapcz_segments)
+    return list(dapcz_segments["SEGMENT_ID"])
 
 
 def road_class_scoring(row):
@@ -168,7 +182,8 @@ def main():
     permits["duration_scoring"] = permits.apply(duration_scoring, axis=1)
 
     # road segment class scoring
-    segments = retrieve_road_segment_data(segments)
+    gis = GIS("https://austin.maps.arcgis.com", username=AGOL_USERNAME, password=AGOL_PASSWORD)
+    segments = retrieve_road_segment_data(segments, gis)
     segments["segment_road_class_scoring"] = segments.apply(road_class_scoring, axis=1)
     # get maximum scoring for each permit's segments
     road_class = segments.groupby("FOLDERRSN")["segment_road_class_scoring"].max()
