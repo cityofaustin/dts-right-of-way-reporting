@@ -6,7 +6,6 @@ from arcgis.gis import GIS
 from arcgis.features import FeatureLayer
 from arcgis.geometry.filters import intersects
 
-
 import os
 
 from config import DAPCZ_SHAPE, SEGMENTS_FEATURE_SERVICE_URL, DAPCZ_FEATURE_SERVICE_URL, ROW_INSPECTOR_SERVICE_URL
@@ -108,9 +107,11 @@ def retrieve_road_segment_data(segments, gis):
 
     # Flagging segments if they are in the DAPCZ for later scoring
     dapcz_segments = retrieve_dapcz_segments(gis, segments_layer)
-    segments["is_dapcz"] = segments["segment_id"].isin(dapcz_segments)
+    segments["is_dapcz"] = segments["SEGMENT_ID"].isin(dapcz_segments)
 
-    # TODO: Tagging segments with the appropriate ROW inspector zone
+    # Tagging segments with the appropriate ROW inspector zone
+    inspector_zone_mapping = retrieve_row_inspector_segments(gis, segments_layer)
+    segments["row_inspector_zone"] = segments["SEGMENT_ID"].map(inspector_zone_mapping)
 
     return segments
 
@@ -129,6 +130,23 @@ def retrieve_dapcz_segments(gis, segments_layer):
         dapcz_segments.append(response.df)
     dapcz_segments = pd.concat(dapcz_segments)
     return list(dapcz_segments["SEGMENT_ID"])
+
+
+def retrieve_row_inspector_segments(gis, segments_layer):
+    """
+    Tags roadway segments with appropriate ROW inspector zone.
+    If a segment is in multiple, only the last ROW inspector zone is used.
+    """
+    dapcz_features = FeatureLayer(ROW_INSPECTOR_SERVICE_URL, gis)
+    dapcz_features = dapcz_features.query(where="1=1", return_geometry=True)
+    inspector_zone_segments = {}
+    for polygon in dapcz_features.features:
+        zone_id = polygon.attributes["ROW_INSPECTOR_ZONE_ID"]
+        filter = intersects(polygon.geometry)
+        response = segments_layer.query(geometry_filter=filter, out_fields="SEGMENT_ID")
+        for seg in list(response.df["SEGMENT_ID"]):
+            inspector_zone_segments[seg] = zone_id
+    return inspector_zone_segments
 
 
 def road_class_scoring(row):
