@@ -276,7 +276,12 @@ QUERIES = {
     "row_inspector_segment_list": """
     SELECT
         fp.folderrsn AS FOLDERRSN,
-        fp.propertyrsn AS PROPERTYRSN
+        fp.propertyrsn AS PROPERTYRSN,
+        CASE WHEN fp.PROPERTYRELATIONCODE = 5 THEN
+            'TRUE'
+        ELSE
+            'FALSE'
+        END AS is_primary
     FROM
         folder f,
         folderproperty fp,
