@@ -9,6 +9,7 @@ SO_WEB=
 # Socrata Dataset IDs
 WEEK_DATASET=ij2v-mrv3
 ACTIVE_DATASET=hyc6-zz9w
+PRIORITY_DATASET=cavh-ec9p
 
 # Smartsheet
 SMARTSHEET_ACCESS_TOKEN=

@@ -4,14 +4,13 @@ in Socrata AKA the open data portal AKA city datahub
 """
 import argparse
 import boto3
-import csv
 import logging
 from sodapy import Socrata
-import io
+import numpy as np
 
 import os
 
-import utils
+from utils import df_to_socrata_dataset, get_logger, s3_csv_to_df
 from socrata_config import DATASETS
 
 # AWS Credentials
@@ -28,39 +27,26 @@ SO_SECRET = os.getenv("SO_SECRET")
 DATASET = os.getenv("SO_DATASET")
 
 
-def download_csv(file_name):
-    """
-    downloads the CSV file from S3 and returns it as a list of dictionaries
-    """
-    logger.info(f"Downloading csv file from S3: {file_name}")
-    s3_client = boto3.client(
+def main(args):
+    dataset = DATASETS[args.dataset]
+
+    logger.info(f"Downloading csv file from S3: {dataset['file_name']}")
+    s3 = boto3.client(
         "s3", aws_access_key_id=AWS_ACCESS_ID, aws_secret_access_key=AWS_PASS
     )
+    df = s3_csv_to_df(s3, BUCKET, dataset["file_name"])
+    # replacing NaN's with None (Socrata doesn't like)
+    df = df.replace(np.nan, None)
 
-    response = s3_client.get_object(Bucket=BUCKET, Key=file_name)
-    lines = response["Body"].read().decode("utf-8")
-    buf = io.StringIO(lines)
-    reader = csv.DictReader(buf)
-    return list(reader)
+    if "sodapy_method" not in dataset:
+        method = None
+    else:
+        method = dataset["sodapy_method"]
 
-def cleanup_empty_strings(data):
-    """
-    Replaces empty string with None in our list of dictionaries
-    """
-    for row in data:
-        for key in row:
-            if row[key] == "":
-                row[key] = None
-
-    return data
-
-def upload_to_socrata(payload, dataset, method="upsert"):
-    """
-    uploads a list of dictionaries to a socrata dataset
-    """
     logger.info(
-        f"Uploading to dataset: datahub.austintexas.gov/d/{dataset}, method: {method}"
+        f"Uploading to dataset: datahub.austintexas.gov/d/{dataset['resource_id']}, method: {method}"
     )
+
     soda = Socrata(
         SO_WEB,
         SO_TOKEN,
@@ -69,26 +55,7 @@ def upload_to_socrata(payload, dataset, method="upsert"):
         timeout=60,
     )
 
-    if method == "upsert":
-        res = soda.upsert(dataset, payload)
-    elif method == "replace":
-        res = soda.replace(dataset, payload)
-
-    return res
-
-
-def main(args):
-    dataset = DATASETS[args.dataset]
-
-    data = download_csv(dataset["file_name"])
-    data = cleanup_empty_strings(data)
-
-    if "sodapy_method" not in dataset:
-        method = None
-    else:
-        method = dataset["sodapy_method"]
-
-    response = upload_to_socrata(data, dataset["resource_id"], method=method)
+    response = df_to_socrata_dataset(soda, dataset["resource_id"], df, method=method)
     logger.info(response)
 
 
@@ -104,7 +71,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-logger = utils.get_logger(
+logger = get_logger(
     __name__,
     level=logging.INFO,
 )

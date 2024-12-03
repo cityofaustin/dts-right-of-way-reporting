@@ -6,7 +6,7 @@ import pandas as pd
 from sodapy import Socrata
 
 import os
-
+from utils import s3_csv_to_df, df_to_socrata_dataset
 
 # AWS Credentials
 AWS_ACCESS_ID = os.getenv("EXEC_DASH_ACCESS_ID")
@@ -54,11 +54,6 @@ FILES = [
         "summary_cols": "Count Permits",
     },
 ]
-
-
-def s3_to_df(s3, filename):
-    response = s3.get_object(Bucket=BUCKET, Key=filename)
-    return pd.read_csv(response.get("Body"))
 
 
 def summarize_weekly(dfs):
@@ -135,20 +130,6 @@ def socrata_columns(df):
     return df
 
 
-def df_to_socrata(soda, df):
-    """
-    Replaces all the data in the socrata dataset with data in the dataframe.
-
-    Parameters
-    ----------
-    soda: sodapy client object
-    df : Pandas Dataframe
-
-    """
-    payload = df.to_dict("records")
-    soda.replace(DATASET, payload)
-
-
 def main():
     s3_client = boto3.client(
         "s3", aws_access_key_id=AWS_ACCESS_ID, aws_secret_access_key=AWS_PASS
@@ -165,7 +146,7 @@ def main():
     dfs = []
     for f in FILES:
         row = f
-        row["data"] = s3_to_df(s3_client, f["fname"])
+        row["data"] = s3_csv_to_df(s3_client, BUCKET, f["fname"])
         dfs.append(row)
 
     # Create a weekly summary of the data
@@ -173,7 +154,7 @@ def main():
     # Cleanup column names
     weekly = socrata_columns(weekly)
     # Upload to socrata
-    df_to_socrata(soda, weekly)
+    df_to_socrata_dataset(soda, DATASET, weekly, method="replace")
 
 
 if __name__ == "__main__":
