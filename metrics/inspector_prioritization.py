@@ -226,6 +226,11 @@ def main():
     permits = permits.merge(dapcz, left_on="FOLDERRSN", right_index=True, how="left")
     permits["dapcz_scoring"] = permits["dapcz_scoring"].fillna(0)
 
+    # Merging ROW inspector zone to permits
+    row_inspector_zones = segments.groupby("FOLDERRSN")["row_inspector_zone"].max()
+    row_inspector_zones = row_inspector_zones.rename("row_inspector_zone")
+    permits = permits.merge(row_inspector_zones, left_on="FOLDERRSN", right_index=True, how="left")
+
     # Total Scoring
     cols = permits.columns
     scoring_cols = []
