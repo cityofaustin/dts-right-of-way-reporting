@@ -21,6 +21,8 @@ AMANDA is the backend system that underlies the [Austin Build + Connect](https:/
 - `ex_permits_issued`: Gets the list of EX permits and their indate and issuedate
 - `license_agreements_timeline`: Gets a list of license reviews and a series of dates of review completion dates. 
 - `lde_site_plan_revisions`: Gets a list of land development engineering reviews and key dates for reviews and their due dates.
+- `row_inspector_permit_list`: Returns all active permits assigned to the Right of Way division.
+- `row_inspector_segment_list`: Returns roadway segment IDs associated with active permits
 
 ## Smartsheet
 
@@ -34,11 +36,16 @@ This sub directory stores the scripts that processes the data from AMANDA and/or
 
 `active_permits_logging.py` posts the current number of active permits to the [city's data hub](https://datahub.austintexas.gov/login). 
 
-`$ python metrics/active_permits_logging.py`
+`python metrics/active_permits_logging.py`
 
 `row_data_summary.py` totals up the count of the various types of permits that were requested and issued to [city's data hub](https://datahub.austintexas.gov/login). 
 
-`$ python metrics/row_data_summary.py`
+`python metrics/row_data_summary.py`
+
+`inspector_prioritization.py` "scores" permits based on several metrics to rank permits based on a prioritization for ROW inspectors.
+
+`python metrics/inspector_prioritization.py`
+
 
 ## Docker
 
