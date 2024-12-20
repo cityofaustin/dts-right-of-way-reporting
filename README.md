@@ -10,7 +10,7 @@ AMANDA is the backend system that underlies the [Austin Build + Connect](https:/
 
 `amanda_to_s3.py` is a script that allows us to run queries on the AMANDA read replica oracle DB and store the result as a .csv file in an AWS S3 bucket. To run this script, select one of the predefined queries in `queries.py` and provide the key as a parameter to the script.
 
-`$ python amanda/amanda_to_s3.py --query applications_received`
+`python amanda/amanda_to_s3.py --query applications_received`
 
 ### Queries
 
@@ -28,7 +28,7 @@ AMANDA is the backend system that underlies the [Austin Build + Connect](https:/
 
 [Smartsheet](https://www.smartsheet.com/) is an additional tool the ROW team uses to manage some types of permits. `smartsheet_to_s3.py` downloads all of the data from the predefined list of sheets in `sheets.py` and stores the data as a .csv file in an AWS S3 bucket. There are no parameters for this script.
 
-`$ python smartsheet/smartsheet_to_s3.py`
+`python smartsheet/smartsheet_to_s3.py`
 
 ## Metrics
 
@@ -51,14 +51,14 @@ This sub directory stores the scripts that processes the data from AMANDA and/or
 
 This repo can be used with a docker container. You can either build it yourself with:
 
-`$ docker build . -t dts-right-of-way-reporting:production`
+`docker build . -t dts-right-of-way-reporting:production`
 
 or pull from our dockerhub account:
 
-`$ docker pull atddocker/dts-right-of-way-reporting:production`
+`docker pull atddocker/dts-right-of-way-reporting:production`
 
 Then, provide the environment variables described in env_template to the docker image:
 
-`$ docker run -it --env-file env_file dts-right-of-way-reporting:production /bin/bash` 
+`docker run -it --env-file env_file dts-right-of-way-reporting:production /bin/bash` 
 
 Then, provide the command you would like to run.
