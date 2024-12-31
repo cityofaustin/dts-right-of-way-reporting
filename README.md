@@ -42,7 +42,9 @@ This sub directory stores the scripts that processes the data from AMANDA and/or
 
 `python metrics/row_data_summary.py`
 
-`inspector_prioritization.py` "scores" permits based on several metrics to rank permits based on a prioritization for ROW inspectors.
+`inspector_prioritization.py` "scores" permits based on several metrics to rank permits based on a prioritization for ROW inspectors. Loads data from csvs in S3 from `amanda_to_s3.py`.
+
+![a diagram describing each of the components of the inspector scoring](docs/row_inspector_scoring.png)
 
 `python metrics/inspector_prioritization.py`
 
