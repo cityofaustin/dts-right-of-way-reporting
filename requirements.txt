@@ -1,7 +1,7 @@
-pandas==2.1.* # 2.2.3
-boto3==1.35.* # 1.35.9
-sodapy==2.2.* # 2.2.0
+pandas==2.1.*
+boto3==1.19.*
+sodapy==2.1.*
 smartsheet-python-sdk==3.0.*
-pytz==2024.2 # 2024.2
-oracledb==2.5.* # 2.5.1
-arcgis==2.4.* # 2.4.0
+pytz==2024.1
+oracledb==2.1.*
+arcgis==2.4.*
