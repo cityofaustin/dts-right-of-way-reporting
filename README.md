@@ -53,7 +53,7 @@ This sub directory stores the scripts that processes the data from AMANDA and/or
 
 This repo can be used with a docker container. You can either build it yourself with:
 
-`docker build . -t dts-right-of-way-reporting:production`
+`docker build . -t atddocker/dts-right-of-way-reporting:local`
 
 or pull from our dockerhub account:
 
@@ -61,6 +61,6 @@ or pull from our dockerhub account:
 
 Then, provide the environment variables described in env_template to the docker image:
 
-`docker run -it --env-file env_file dts-right-of-way-reporting:production /bin/bash` 
+`docker run -it --env-file env_file -v "$(pwd):/app" atddocker/dts-right-of-way-reporting:production /bin/bash` 
 
 Then, provide the command you would like to run.
