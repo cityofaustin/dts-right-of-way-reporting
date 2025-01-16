@@ -1,19 +1,11 @@
 import boto3
 import pandas as pd
 import numpy as np
-from arcgis.gis import GIS
-from arcgis.features import FeatureLayer
-from arcgis.geometry.filters import intersects
 from sodapy import Socrata
 
 import os
 import logging
 
-from config import (
-    SEGMENTS_FEATURE_SERVICE_URL,
-    DAPCZ_FEATURE_SERVICE_URL,
-    ROW_INSPECTOR_SERVICE_URL,
-)
 from utils import get_logger, s3_csv_to_df, df_to_socrata_dataset
 
 # AWS Credentials
@@ -27,10 +19,7 @@ SO_TOKEN = os.getenv("SO_TOKEN")
 SO_KEY = os.getenv("SO_KEY")
 SO_SECRET = os.getenv("SO_SECRET")
 DATASET = os.getenv("PRIORITY_DATASET")
-
-# AGOL Credentials
-AGOL_USERNAME = os.getenv("AGOL_USERNAME")
-AGOL_PASSWORD = os.getenv("AGOL_PASSWORD")
+SEGMENT_DATASET = os.getenv("SEGMENT_DATASET")
 
 PERMITS_FILE = "row_inspector_permit_list.csv"
 SEGMENTS_FILE = "row_inspector_segment_list.csv"
@@ -95,75 +84,21 @@ def batch_list(data, batch_size=100):
         yield data[i : i + batch_size]
 
 
-def retrieve_road_segment_data(segments, gis):
-    segments_layer = FeatureLayer(SEGMENTS_FEATURE_SERVICE_URL, gis)
-    segment_ids = list(segments["PROPERTYRSN"].unique())
-    segment_batches = batch_list(segment_ids)
-    segment_data = []
-    for segment_batch in segment_batches:
-        segment_batch = ", ".join(map(str, segment_batch))
-        query_result = segments_layer.query(
-            where=f"segment_id in ({segment_batch})",
-            out_fields="*",
-            return_geometry=True,
-        )
-        segment_data.append(query_result.df)
-    segment_data = pd.concat(segment_data)
+def retrieve_road_segment_data(segments, soda):
+    data = soda.get(SEGMENT_DATASET, limit=999999)
+    segment_data = pd.DataFrame(data)
+    segment_data["segment_id"] = segment_data["segment_id"].astype(int)
+    segment_data["inspector_zone"] = segment_data["inspector_zone"].astype(float)
+
     segments = segments.merge(
-        segment_data, left_on="PROPERTYRSN", right_on="SEGMENT_ID", how="inner"
+        segment_data, left_on="PROPERTYRSN", right_on="segment_id", how="inner"
     )
 
     # Flagging segments if they are in the DAPCZ for later scoring
-    dapcz_segments = retrieve_dapcz_segments(gis, segments_layer)
-    segments["is_dapcz"] = segments["SEGMENT_ID"].isin(dapcz_segments)
+    segments["is_dapcz"] = segments["dapcz_zone"].notnull()
 
-    # Tagging (primary) segments with the appropriate ROW inspector zone
-    inspector_zones = FeatureLayer(ROW_INSPECTOR_SERVICE_URL, gis)
-    primary_segments = segments[segments["IS_PRIMARY"]]
-    primary_segments.drop_duplicates(subset=["SEGMENT_ID"], inplace=True)
-    primary_segments = primary_segments.to_dict(orient="records")
-    row_inspector_lookup = {}
-    for segment in primary_segments:
-        geom = segment["SHAPE"]
-        row_inspector_lookup[
-            segment["SEGMENT_ID"]
-        ] = retrieve_row_inspector_segments_by_segment(geom, gis, inspector_zones)
-    segments["row_inspector_zone"] = segments["SEGMENT_ID"].map(row_inspector_lookup)
-
+    segments.rename(columns={"inspector_zone": "row_inspector_zone"}, inplace=True)
     return segments
-
-
-def retrieve_dapcz_segments(gis, segments_layer):
-    """
-    Gets the list of street segments within the Downtown Project Coordination Zone (DAPCZ) polygon.
-    """
-    dapcz_features = FeatureLayer(DAPCZ_FEATURE_SERVICE_URL, gis)
-    dapcz_features = dapcz_features.query(where="1=1", return_geometry=True)
-    dapcz_segments = []
-    for polygon in dapcz_features.features:
-        filter = intersects(polygon.geometry)
-        response = segments_layer.query(geometry_filter=filter, out_fields="SEGMENT_ID")
-        dapcz_segments.append(response.df)
-    dapcz_segments = pd.concat(dapcz_segments)
-    return list(dapcz_segments["SEGMENT_ID"])
-
-
-def retrieve_row_inspector_segments_by_segment(geom, gis, inspector_zones):
-    """
-    Tags roadway segments with appropriate ROW inspector zone.
-    If a segment is in multiple, only the last ROW inspector zone is used.
-    """
-    filter = intersects(geom)
-    response = inspector_zones.query(
-        geometry_filter=filter,
-        out_fields="ROW_INSPECTOR_ZONE_ID",
-        return_geometry=False,
-        gis=gis,
-    )
-    if response.features:
-        # It is possible a segment could intersect multiple zones, but we only take the first one.
-        return response.features[0].attributes["ROW_INSPECTOR_ZONE_ID"]
-    return None
 
 
 def road_class_scoring(row):
@@ -176,11 +111,11 @@ def road_class_scoring(row):
     else = 3 (local city/county streets, whatever else)
 
     """
-    if row["ROAD_CLASS"] in (1, 2, 4):
+    if row["road_class"] in (1, 2, 4):
         return 10
-    elif row["ROAD_CLASS"] == 5:
+    elif row["road_class"] == 5:
         return 7
-    elif row["ROAD_CLASS"] == 8:
+    elif row["road_class"] == 8:
         return 5
     return 3
 
@@ -194,18 +129,24 @@ def main():
     segments = s3_csv_to_df(s3_client, BUCKET, SEGMENTS_FILE)
     logger.info(f"{len(segments)} Segments retrieved from S3")
 
+    # Socrata credentials
+    soda = Socrata(
+        SO_WEB,
+        SO_TOKEN,
+        username=SO_KEY,
+        password=SO_SECRET,
+        timeout=500,
+    )
+
     # number of segments scoring:
     permits = number_of_segments_scoring(permits, segments)
 
     # permit duration scoring:
     permits["duration_scoring"] = permits.apply(duration_scoring, axis=1)
 
-    # downloading road geometry data from AGOL
-    gis = GIS(
-        "https://austin.maps.arcgis.com", username=AGOL_USERNAME, password=AGOL_PASSWORD
-    )
-    logger.info("Retrieving road segment data from AGOL...")
-    segments = retrieve_road_segment_data(segments, gis)
+    # downloading road segment data
+    logger.info("Retrieving road segment data...")
+    segments = retrieve_road_segment_data(segments, soda)
 
     # road segment class scoring
     logger.info("Scoring permits based on road segments data")
@@ -229,7 +170,9 @@ def main():
     # Merging ROW inspector zone to permits
     row_inspector_zones = segments.groupby("FOLDERRSN")["row_inspector_zone"].max()
     row_inspector_zones = row_inspector_zones.rename("row_inspector_zone")
-    permits = permits.merge(row_inspector_zones, left_on="FOLDERRSN", right_index=True, how="left")
+    permits = permits.merge(
+        row_inspector_zones, left_on="FOLDERRSN", right_index=True, how="left"
+    )
 
     # Total Scoring
     cols = permits.columns
@@ -252,15 +195,9 @@ def main():
     # replacing NaN's with None (Socrata doesn't like)
     permits = permits.replace(np.nan, None)
 
-    soda = Socrata(
-        SO_WEB,
-        SO_TOKEN,
-        username=SO_KEY,
-        password=SO_SECRET,
-        timeout=500,
+    logger.info(
+        f"Replacing data in Socrata dataset: datahub.austintexas.gov/d/{DATASET}"
     )
-
-    logger.info(f"Replacing data in Socrata dataset: datahub.austintexas.gov/d/{DATASET}")
     response = df_to_socrata_dataset(soda, DATASET, permits, method="replace")
     logger.info(response)
 
