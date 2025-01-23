@@ -155,8 +155,7 @@ QUERIES = {
         f.FOLDERTYPE in('LM') -- Land Management folder type only
         AND f.STATUSCODE NOT in(56050) -- Remove VOID status
     """,
-    "lde_site_plan_revisions":
-    """
+    "lde_site_plan_revisions": """
     SELECT
         f.FOLDERTYPE,
         f.FOLDERREVISION,
@@ -215,5 +214,91 @@ QUERIES = {
         f.FOLDERTYPE,
         vp.PROCESSDESC,
         fp.PROCESSRSN
-    """
+    """,
+    "row_inspector_permit_list": """
+    SELECT
+        vs.subdesc AS PERMIT_TYPE,
+        f.foldertype AS FOLDERTYPE,
+        f.referencefile AS PERMIT,
+        f.folderrsn AS FOLDERRSN,
+        f.foldername AS FOLDER_NAME,
+        pr.propertyname AS PROPERTY_NAME,
+        f.expirydate AS EXPIRY_DATE,
+        p.organizationname AS CONTRACTOR,
+        p.phone1 AS PHONE, (
+            SELECT
+                infovalue
+            FROM
+                folderinfo fi
+            WHERE
+                fi.folderrsn = f.folderrsn
+                AND fi.infocode = 75390) Total_Days, -- only for RW permits
+            (
+                SELECT
+                    infovalue
+                FROM
+                    folderinfo fi
+                WHERE
+                    fi.folderrsn = f.folderrsn
+                    AND fi.infocode = 76110) Start_Date, -- EX permits only
+                (
+                    SELECT
+                        infovalue
+                    FROM
+                        folderinfo fi
+                    WHERE
+                        fi.folderrsn = f.folderrsn
+                        AND fi.infocode = 76115) End_Date, -- EX permits only
+                    trunc(trunc(f.expirydate) - trunc(f.issuedate)) AS WZ_Duration -- used for DS permits
+                FROM
+                    validsub vs,
+                    folder f,
+                    property pr,
+                    folderpeople fp,
+                    people p
+                WHERE (f.foldertype = 'RW'
+                    AND f.subcode = 50500 --TURP only
+                    AND f.foldername NOT LIKE 'LA-%' -- removing LAs'
+                    AND f.subcode = vs.subcode
+                    AND fp.peoplecode = 1
+                    AND f.statuscode = 50010 --ACTIVE Permits only
+                    AND f.propertyrsn = pr.propertyrsn
+                    AND fp.peoplersn = p.peoplersn
+                    AND f.folderrsn = fp.folderrsn)
+                OR(f.foldertype in('EX', 'DS')
+                    AND fp.peoplecode = 50065 -- ROW Contractors
+                    AND f.statuscode = 50010 --ACTIVE Permits only
+                    AND f.subcode = vs.subcode
+                    AND f.propertyrsn = pr.propertyrsn
+                    AND fp.peoplersn = p.peoplersn
+                    AND f.folderrsn = fp.folderrsn)
+    """,
+    "row_inspector_segment_list": """
+    SELECT
+        fp.folderrsn AS FOLDERRSN,
+        fp.propertyrsn AS PROPERTYRSN,
+        CASE WHEN fp.PROPERTYRELATIONCODE = 5 THEN
+            'TRUE'
+        ELSE
+            'FALSE'
+        END AS is_primary
+    FROM
+        folder f,
+        folderproperty fp,
+        property p
+    WHERE (f.foldertype = 'RW'
+        AND f.subcode = 50500 --TURP
+        AND f.statuscode = 50010 --ACTIVE
+        AND f.foldername NOT LIKE 'LA-%'
+        AND p.propcode = 52010
+        AND f.folderrsn = fp.folderrsn
+        AND fp.propertyrsn = p.propertyrsn)
+        OR(f.foldertype in('EX', 'DS')
+            AND f.statuscode = 50010 --ACTIVE
+            AND p.propcode = 52010
+            AND f.folderrsn = fp.folderrsn
+            AND fp.propertyrsn = p.propertyrsn)
+    ORDER BY
+        fp.folderrsn
+    """,
 }

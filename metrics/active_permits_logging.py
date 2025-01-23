@@ -10,6 +10,8 @@ import pytz
 
 import os
 
+from utils import df_to_socrata_dataset
+
 tz = "US/Central"
 
 # AWS Credentials
@@ -64,20 +66,6 @@ def socrata_columns(df):
     return df
 
 
-def df_to_socrata(soda, df):
-    """
-    Upserts the data in the socrata dataset with data in the dataframe. Must have a row identifier created.
-
-    Parameters
-    ----------
-    soda: sodapy client object
-    df : Pandas Dataframe
-
-    """
-    payload = df.to_dict("records")
-    soda.upsert(DATASET, payload)
-
-
 def main():
     s3_client = boto3.client(
         "s3", aws_access_key_id=AWS_ACCESS_ID, aws_secret_access_key=AWS_PASS
@@ -97,7 +85,7 @@ def main():
     # Format columns
     df = socrata_columns(df)
     # Upsert to socrata
-    df_to_socrata(soda, df)
+    df_to_socrata_dataset(soda, DATASET, df, method="upsert")
 
 
 if __name__ == "__main__":
