@@ -7,6 +7,5 @@ WORKDIR /app
 COPY . /app
 
 # Proceed to install the requirements...do
-RUN apt-get --allow-releaseinfo-change update
-RUN apt-get install libkrb5-dev -y
+RUN apt-get install libkrb5-dev libkrb5-3 -y
 RUN pip install -r requirements.txt
