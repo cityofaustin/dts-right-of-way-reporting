@@ -179,6 +179,21 @@ def recent_inspection_scoring(row):
     return 0
 
 
+def cleanup_permit_types(row):
+    """
+    Parameters
+    ----------
+    row - works row-wise on the permits data
+
+    Returns
+    -------
+    Permit types based on the foldertype
+
+    """
+    if row["FOLDERTYPE"] == "RW":
+        return row["RW_WORK_DESCRIPTION"]
+    return row["PERMIT_TYPE"]
+
 
 def main():
     s3_client = boto3.client(
@@ -240,6 +255,9 @@ def main():
 
     # Recent inspection scoring
     permits["recent_inspection_scoring"] = permits.apply(recent_inspection_scoring, axis=1)
+
+    # Cleanup permit types
+    permits["PERMIT_TYPE"] = permits.apply(cleanup_permit_types, axis=1)
 
     # Total Scoring
     cols = permits.columns
