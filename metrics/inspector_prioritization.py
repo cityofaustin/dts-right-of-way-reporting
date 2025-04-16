@@ -168,14 +168,14 @@ def recent_inspection_scoring(row):
 
     Returns
     -------
-    5 points if there was a traffic inspection attempt in the last 7 calendar days
+    lose 5 points if there was a traffic inspection attempt in the last 7 calendar days
 
     """
     if row["MOST_RECENT_INSPECTION"]:
         inspection_dt = pd.to_datetime(row["MOST_RECENT_INSPECTION"])
         delta = datetime.datetime.today() - inspection_dt
         if delta.days <= 7:
-            return 5
+            return -5
     return 0
 
 
