@@ -256,9 +256,9 @@ QUERIES = {
             FROM folderprocessdeficiency fprd
             WHERE fprd.PROCESSRSN = fpr.PROCESSRSN
               AND fprd.statuscode = 55360)                    Count_deficiencies,
-           (SELECT max(INSERTDATE) as inspection_date
-            FROM folderprocessdeficiency fprd
-            WHERE fprd.PROCESSRSN = fpr.PROCESSRSN)           Most_Recent_Inspection
+           (SELECT max(attemptdate) as inspection_date
+            FROM AMANDA.FOLDERPROCESSATTEMPT fpra
+            WHERE fpra.PROCESSRSN = fpr.PROCESSRSN)           Most_Recent_Inspection
     FROM folder f
              left JOIN validsub vs on vs.subcode = f.subcode
              left JOIN VALIDWORK vw on vw.workcode = f.workcode
