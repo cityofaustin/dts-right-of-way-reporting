@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from sodapy import Socrata
 
+import datetime
 import os
 import logging
 
@@ -60,28 +61,36 @@ def duration_scoring(row):
     # each permit type uses a different column from the query for the duration (in days).
     if row["FOLDERTYPE"] == "RW":
         duration_column = "TOTAL_DAYS"
+        start = row["EVENT_START_DATE"]
     if row["FOLDERTYPE"] == "DS":
         duration_column = "WZ_DURATION"
+        start = row["ISSUE_DATE"]
     if row["FOLDERTYPE"] == "EX":
-        start = pd.to_datetime(row["START_DATE"])
-        end = pd.to_datetime(row["END_DATE"])
-        delta = end - start
+        if row["EXTENSION_START_DATE"] and row["EXTENSION_END_DATE"]:
+            start = row["EXTENSION_START_DATE"]
+            start_dt = pd.to_datetime(start)
+            end_dt = pd.to_datetime(row["EXTENSION_END_DATE"])
+        else:
+            start = row["START_DATE"]
+            start_dt = pd.to_datetime(start)
+            end_dt = pd.to_datetime(row["END_DATE"])
+        delta = end_dt - start_dt
         row["duration"] = delta.days
         duration_column = "duration"
 
     # Scoring based on number of days the permit is active:
     if row[duration_column] <= 6:
-        return 10
+        return 10, row[duration_column], start
     elif row[duration_column] <= 15:
-        return 5
+        return 5, row[duration_column], start
     elif row[duration_column] <= 30:
-        return 3
-    return 1
+        return 3, row[duration_column], start
+    return 1, row[duration_column], start
 
 
 def batch_list(data, batch_size=100):
     for i in range(0, len(data), batch_size):
-        yield data[i : i + batch_size]
+        yield data[i: i + batch_size]
 
 
 def retrieve_road_segment_data(segments, soda):
@@ -120,6 +129,72 @@ def road_class_scoring(row):
     return 3
 
 
+def open_deficiencies_scoring(row):
+    """
+
+    Parameters
+    ----------
+    row
+
+    Returns
+    -------
+
+    """
+    if row["COUNT_DEFICIENCIES"] > 0:
+        return 5
+
+
+def active_deficiencies_scoring(row):
+    """
+    Parameters
+    ----------
+    row - works row-wise on the permits data
+
+    Returns
+    -------
+    5 if there are active deficiencies, 0 otherwise.
+
+    """
+    if row["COUNT_DEFICIENCIES"] > 0:
+        return 5
+    return 0
+
+
+def recent_inspection_scoring(row):
+    """
+    Parameters
+    ----------
+    row - works row-wise on the permits data
+
+    Returns
+    -------
+    lose 5 points if there was a traffic inspection attempt in the last 7 calendar days
+
+    """
+    if row["MOST_RECENT_INSPECTION"]:
+        inspection_dt = pd.to_datetime(row["MOST_RECENT_INSPECTION"])
+        delta = datetime.datetime.today() - inspection_dt
+        if delta.days <= 7:
+            return -5
+    return 0
+
+
+def cleanup_permit_types(row):
+    """
+    Parameters
+    ----------
+    row - works row-wise on the permits data
+
+    Returns
+    -------
+    Permit types based on the foldertype
+
+    """
+    if row["FOLDERTYPE"] == "RW":
+        return row["RW_WORK_DESCRIPTION"]
+    return row["PERMIT_TYPE"]
+
+
 def main():
     s3_client = boto3.client(
         "s3", aws_access_key_id=AWS_ACCESS_ID, aws_secret_access_key=AWS_PASS
@@ -142,7 +217,8 @@ def main():
     permits = number_of_segments_scoring(permits, segments)
 
     # permit duration scoring:
-    permits["duration_scoring"] = permits.apply(duration_scoring, axis=1)
+    permits[["duration_scoring", "duration", "START_DATE"]] = permits.apply(duration_scoring, axis=1,
+                                                                            result_type='expand')
 
     # downloading road segment data
     logger.info("Retrieving road segment data...")
@@ -174,6 +250,15 @@ def main():
         row_inspector_zones, left_on="FOLDERRSN", right_index=True, how="left"
     )
 
+    # Active deficiencies scoring
+    permits["active_deficiencies_scoring"] = permits.apply(active_deficiencies_scoring, axis=1)
+
+    # Recent inspection scoring
+    permits["recent_inspection_scoring"] = permits.apply(recent_inspection_scoring, axis=1)
+
+    # Cleanup permit types
+    permits["PERMIT_TYPE"] = permits.apply(cleanup_permit_types, axis=1)
+
     # Total Scoring
     cols = permits.columns
     scoring_cols = []
@@ -187,6 +272,11 @@ def main():
         "EXPIRY_DATE",
         "START_DATE",
         "END_DATE",
+        "ISSUE_DATE",
+        "MOST_RECENT_INSPECTION",
+        "EXTENSION_START_DATE",
+        "EXTENSION_END_DATE",
+        "EVENT_START_DATE",
     ]
     for field in date_fields:
         permits[field] = pd.to_datetime(permits[field], format="mixed")

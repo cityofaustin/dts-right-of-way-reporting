@@ -216,62 +216,67 @@ QUERIES = {
         fp.PROCESSRSN
     """,
     "row_inspector_permit_list": """
-    SELECT
-        vs.subdesc AS PERMIT_TYPE,
-        f.foldertype AS FOLDERTYPE,
-        f.referencefile AS PERMIT,
-        f.folderrsn AS FOLDERRSN,
-        f.foldername AS FOLDER_NAME,
-        pr.propertyname AS PROPERTY_NAME,
-        f.expirydate AS EXPIRY_DATE,
-        p.organizationname AS CONTRACTOR,
-        p.phone1 AS PHONE, (
-            SELECT
-                infovalue
-            FROM
-                folderinfo fi
-            WHERE
-                fi.folderrsn = f.folderrsn
-                AND fi.infocode = 75390) Total_Days, -- only for RW permits
-            (
-                SELECT
-                    infovalue
-                FROM
-                    folderinfo fi
-                WHERE
-                    fi.folderrsn = f.folderrsn
-                    AND fi.infocode = 76110) Start_Date, -- EX permits only
-                (
-                    SELECT
-                        infovalue
-                    FROM
-                        folderinfo fi
-                    WHERE
-                        fi.folderrsn = f.folderrsn
-                        AND fi.infocode = 76115) End_Date, -- EX permits only
-                    trunc(trunc(f.expirydate) - trunc(f.issuedate)) AS WZ_Duration -- used for DS permits
-                FROM
-                    validsub vs,
-                    folder f,
-                    property pr,
-                    folderpeople fp,
-                    people p
-                WHERE (f.foldertype = 'RW'
-                    AND f.subcode = 50500 --TURP only
-                    AND f.foldername NOT LIKE 'LA-%' -- removing LAs'
-                    AND f.subcode = vs.subcode
-                    AND fp.peoplecode = 1
-                    AND f.statuscode = 50010 --ACTIVE Permits only
-                    AND f.propertyrsn = pr.propertyrsn
-                    AND fp.peoplersn = p.peoplersn
-                    AND f.folderrsn = fp.folderrsn)
-                OR(f.foldertype in('EX', 'DS')
-                    AND fp.peoplecode = 50065 -- ROW Contractors
-                    AND f.statuscode = 50010 --ACTIVE Permits only
-                    AND f.subcode = vs.subcode
-                    AND f.propertyrsn = pr.propertyrsn
-                    AND fp.peoplersn = p.peoplersn
-                    AND f.folderrsn = fp.folderrsn)
+    SELECT vs.subdesc                                      AS PERMIT_TYPE,
+           f.foldertype                                    AS FOLDERTYPE,
+           f.referencefile                                 AS PERMIT,
+           f.folderrsn                                     AS FOLDERRSN,
+           f.foldername                                    AS FOLDER_NAME,
+           pr.propertyname                                 AS PROPERTY_NAME,
+           f.expirydate                                    AS EXPIRY_DATE,
+           f.issuedate                                     AS ISSUE_DATE,
+           p.organizationname                              AS CONTRACTOR,
+           p.phone1                                        AS PHONE,
+           vw.workdesc                                     as RW_WORK_DESCRIPTION,
+           trunc(trunc(f.expirydate) - trunc(f.issuedate)) AS WZ_Duration,          -- used for DS permits
+           (SELECT infovalue
+            FROM folderinfo fi
+            WHERE fi.folderrsn = f.folderrsn
+              AND fi.infocode = 75390)                        Total_Days,           -- only for RW permits
+           (SELECT infovalue
+            FROM folderinfo fi
+            WHERE fi.folderrsn = f.folderrsn
+              AND fi.infocode = 75980)                        Event_Start_Date,     -- only for RW permits
+           (SELECT infovalue
+            FROM folderinfo fi
+            WHERE fi.folderrsn = f.folderrsn
+              AND fi.infocode = 76110)                        Start_Date,           -- EX permits only
+           (SELECT infovalue
+            FROM folderinfo fi
+            WHERE fi.folderrsn = f.folderrsn
+              AND fi.infocode = 75993)                        Extension_Start_Date, -- EX permits only
+           (SELECT infovalue
+            FROM folderinfo fi
+            WHERE fi.folderrsn = f.folderrsn
+              AND fi.infocode = 75994)                        Extension_End_Date,   -- EX permits only
+           (SELECT infovalue
+            FROM folderinfo fi
+            WHERE fi.folderrsn = f.folderrsn
+              AND fi.infocode = 76115)                        End_Date,             -- EX permits only
+           (SELECT count(processrsn) as count
+            FROM folderprocessdeficiency fprd
+            WHERE fprd.PROCESSRSN = fpr.PROCESSRSN
+              AND fprd.statuscode = 55360)                    Count_deficiencies,
+           (SELECT max(attemptdate) as inspection_date
+            FROM AMANDA.FOLDERPROCESSATTEMPT fpra
+            WHERE fpra.PROCESSRSN = fpr.PROCESSRSN)           Most_Recent_Inspection
+    FROM folder f
+             left JOIN validsub vs on vs.subcode = f.subcode
+             left JOIN VALIDWORK vw on vw.workcode = f.workcode
+             left JOIN property pr on pr.propertyrsn = f.propertyrsn
+             left JOIN folderpeople fp on fp.folderrsn = f.folderrsn
+             left JOIN people p on p.peoplersn = fp.peoplersn
+             left join (select processrsn, folderrsn from FOLDERPROCESS where processcode = 50685) fpr
+                       on fpr.FOLDERRSN = f.FOLDERRSN
+    WHERE f.PRIORITY != 1
+      AND (
+        (f.foldertype = 'RW'
+             AND f.subcode = 50500 --TURP only
+             AND f.foldername NOT LIKE 'LA-%' -- removing LAs'
+             AND fp.peoplecode = 1
+             AND f.statuscode = 50010 --ACTIVE Permits only)
+            OR (f.foldertype in ('EX', 'DS')
+                AND fp.peoplecode = 50065 -- ROW Contractors
+                AND f.statuscode = 50010))) --ACTIVE Permits only
     """,
     "row_inspector_segment_list": """
     SELECT
