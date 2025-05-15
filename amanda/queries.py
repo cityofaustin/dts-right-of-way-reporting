@@ -306,4 +306,77 @@ QUERIES = {
     ORDER BY
         fp.folderrsn
     """,
+    "tds_cases": """
+    SELECT
+        foldertype,
+        folderrsn,
+        referencefile,
+        foldername,
+        Reviewer,
+        processrsn,
+        processname,
+        tostart_date,
+        duedate,
+        started_date,
+        ended_date,
+        process_status,
+        CAST(cyclenumber AS NUMBER(10, 0)) CycleNumber,
+        CouncilDistrict
+    FROM
+        (
+            SELECT
+                f.foldertype,
+                f.folderrsn,
+                f.referencefile,
+                f.foldername,
+                vu.username Reviewer,
+                fp.processrsn,
+                vp.PROCESSDESC ProcessName,
+                TO_CHAR(fp.scheduledate, 'YYYY-MM-DD"T"HH24:MI:SS') ToStart_Date,
+                TO_CHAR(fp.scheduleEndDate, 'YYYY-MM-DD"T"HH24:MI:SS') DueDate,
+                TO_CHAR(fp.startdate, 'YYYY-MM-DD"T"HH24:MI:SS') Started_Date,
+                TO_CHAR(fp.enddate, 'YYYY-MM-DD"T"HH24:MI:SS') Ended_Date,
+                vps.statusdesc process_status,
+                ROW_NUMBER() OVER (
+                    PARTITION BY
+                        f.folderrsn,
+                        fp.processcode
+                    ORDER BY
+                        f.folderrsn,
+                        fp.processcode
+                ) cyclenumber,
+                pi.propinfovalue CouncilDistrict
+            FROM
+                folder f
+                JOIN folderprocess fp ON fp.folderrsn = f.folderrsn
+                AND fp.processcode IN (51132, 51834, 84102)
+                JOIN validprocess vp ON vp.processcode = fp.processcode
+                LEFT JOIN validuser vu ON vu.userid = fp.assigneduser
+                JOIN validprocessstatus vps ON vps.statuscode = fp.statuscode
+                JOIN propertyinfo pi ON pi.propertyrsn = f.propertyrsn
+                AND pi.propertyinfocode = 52026 --Propertyinfo-Council District
+            WHERE
+                f.foldertype IN ('C8', 'SP', 'ZC', 'PR', 'CC')
+            GROUP BY
+                f.foldertype,
+                vp.PROCESSDESC,
+                f.folderrsn,
+                f.referencefile,
+                f.foldername,
+                fp.processcode,
+                fp.processrsn,
+                vu.username,
+                fp.scheduledate,
+                fp.scheduleEndDate,
+                fp.startdate,
+                fp.enddate,
+                vps.statusdesc,
+                pi.propinfovalue
+            ORDER BY
+                vu.username,
+                f.foldertype,
+                vp.processdesc,
+                fp.processrsn
+        )
+    """
 }
