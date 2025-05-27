@@ -9,4 +9,9 @@ DATASETS = {
         "resource_id": "bek3-sdgd",
         "sodapy_method": "upsert",
     },
+    "tds_cases": {
+        "file_name": "tds_cases.csv",
+        "resource_id": "uzv7-zdtt",
+        "sodapy_method": "replace",
+    },
 }

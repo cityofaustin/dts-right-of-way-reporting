@@ -23,6 +23,7 @@ AMANDA is the backend system that underlies the [Austin Build + Connect](https:/
 - `lde_site_plan_revisions`: Gets a list of land development engineering reviews and key dates for reviews and their due dates.
 - `row_inspector_permit_list`: Returns all active permits assigned to the Right of Way division.
 - `row_inspector_segment_list`: Returns roadway segment IDs associated with active permits
+- `tds_cases`: Returns the list of cases involving Transportation Development Services (TDS) and the cycle number.
 
 ## Smartsheet
 
