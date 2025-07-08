@@ -24,6 +24,7 @@ AMANDA is the backend system that underlies the [Austin Build + Connect](https:/
 - `row_inspector_permit_list`: Returns all active permits assigned to the Right of Way division.
 - `row_inspector_segment_list`: Returns roadway segment IDs associated with active permits
 - `tds_cases`: Returns the list of cases involving Transportation Development Services (TDS) and the cycle number.
+- `tds_asmd_map`: TBD from Tracy
 
 ## Smartsheet
 

@@ -14,4 +14,9 @@ DATASETS = {
         "resource_id": "uzv7-zdtt",
         "sodapy_method": "replace",
     },
+    "tds_asmd_map": {
+        "file_name": "tds_asmd_map.csv",
+        "resource_id": "2jm8-nsf3",
+        "sodapy_method": "replace",
+    }
 }
