@@ -378,5 +378,67 @@ QUERIES = {
                 vp.processdesc,
                 fp.processrsn
         )
+    """,
+    "tds_asmd_map":
+    """
+    SELECT
+        f.folderrsn,
+        f.parentrsn,
+        p.PropHouse || ' ' || p.PropStreet || ' ' || p.PropStreetType || ' ' || p.PropStreetDirection || ' ' || p.PropUnitType || ' ' || p.PropUnit || ' ' || p.propprovince || ' ' || p.proppostal AS "Primary Folder Property Address",
+        fp.propertyrsn AS "Primary Folder Property PROPID",
+        p.propertyroll AS "Primary Folder Property Roll Number",
+        PI.propinfovalue AS "Primary Folder Property SEGM_GIS_ID",
+        vs.statusdesc,
+        f.foldername,
+        (
+            SELECT
+                sum(ab.totalpaid)
+            FROM
+                accountbill ab
+            WHERE
+                ab.folderrsn = f.folderrsn
+        ) AS "Total amount fees Paid",
+        FI1.infovalue AS "Offset Amount",
+        FI2.infovalue AS "ROW Dedication Value Calculated",
+        FI3.infovalue AS "Easement Dedication Value Calculated",
+        (
+            SELECT
+                SUM(ff.F03)
+            FROM
+                folderfreeform ff
+            WHERE
+                ff.folderrsn = f.folderrsn
+        ) AS "Total Affordability Units",
+        FI4.infovalue AS "Council District",
+        FI5.infovalue AS "SIF District Area",
+        FI6.infovalue AS "Total Affordability Reduction",
+        FI7.infovalue AS "Transportation Land Use"
+    FROM
+        folder f
+        JOIN validstatus vs ON f.statuscode = vs.statuscode
+        JOIN folderproperty fp ON f.folderrsn = fp.folderrsn
+        AND f.propertyrsn = fp.propertyrsn
+        JOIN property p ON p.propertyrsn = fp.propertyrsn
+        JOIN propertyinfo PI ON p.propertyrsn = PI.propertyrsn
+        AND PI.propertyinfocode = 55005
+        JOIN FOLDERINFO FI1 ON F.FOLDERRSN = FI1.FOLDERRSN
+        AND FI1.INFOCODE = 84021
+        JOIN FOLDERINFO FI2 ON F.FOLDERRSN = FI2.FOLDERRSN
+        AND FI2.INFOCODE = 84040
+        JOIN FOLDERINFO FI3 ON F.FOLDERRSN = FI3.FOLDERRSN
+        AND FI3.INFOCODE = 84043
+        JOIN FOLDERINFO FI4 ON F.FOLDERRSN = FI4.FOLDERRSN
+        AND FI4.INFOCODE = 84011
+        JOIN FOLDERINFO FI5 ON F.FOLDERRSN = FI5.FOLDERRSN
+        AND FI5.INFOCODE = 84012
+        JOIN FOLDERINFO FI6 ON F.FOLDERRSN = FI6.FOLDERRSN
+        AND FI6.INFOCODE = 84044
+        JOIN FOLDERINFO FI7 ON F.FOLDERRSN = FI7.FOLDERRSN
+        AND FI7.INFOCODE = 84016
+    WHERE
+        f.foldertype = 'SIF'
+        AND f.statuscode != 70045
+    ORDER BY
+        f.folderrsn
     """
 }
