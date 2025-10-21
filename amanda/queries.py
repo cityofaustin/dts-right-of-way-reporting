@@ -379,8 +379,7 @@ QUERIES = {
                 fp.processrsn
         )
     """,
-    "tds_asmd_map":
-    """
+    "tds_asmd_map": """
     SELECT
         f.folderrsn,
         f.parentrsn,
@@ -441,8 +440,7 @@ QUERIES = {
     ORDER BY
         f.folderrsn
     """,
-    "sif_payment_details":
-    """
+    "sif_payment_details": """
     SELECT DISTINCT
         f.folderrsn,
         f.parentrsn,
@@ -493,5 +491,5 @@ QUERIES = {
         f.foldertype = 'SIF'
     ORDER BY
         f.folderrsn
-    """
+    """,
 }
