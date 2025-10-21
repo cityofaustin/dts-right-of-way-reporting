@@ -18,5 +18,10 @@ DATASETS = {
         "file_name": "tds_asmd_map.csv",
         "resource_id": "2jm8-nsf3",
         "sodapy_method": "replace",
+    },
+    "sif_payment_details": {
+        "file_name": "sif_payment_details.csv",
+        "resource_id": "kaw2-pkp2",
+        "sodapy_method": "replace",
     }
 }
