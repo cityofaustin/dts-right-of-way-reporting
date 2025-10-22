@@ -379,8 +379,7 @@ QUERIES = {
                 fp.processrsn
         )
     """,
-    "tds_asmd_map":
-    """
+    "tds_asmd_map": """
     SELECT
         f.folderrsn,
         f.parentrsn,
@@ -440,5 +439,57 @@ QUERIES = {
         AND f.statuscode != 70045
     ORDER BY
         f.folderrsn
-    """
+    """,
+    "sif_payment_details": """
+    SELECT DISTINCT
+        f.folderrsn,
+        f.parentrsn,
+        p.PropHouse || ' ' || p.PropStreet || ' ' || p.PropStreetType || ' ' || p.PropStreetDirection || ' ' || p.PropUnitType || ' ' || p.PropUnit || ' ' || p.propprovince || ' ' || p.proppostal AS primary_folder_property,
+        fp.propertyrsn AS primary_folder_property_propid,
+        p.propertyroll AS primary_folder_property_roll,
+        pi.propinfovalue AS primary_folder_property_segm,
+        FI1.infovalue AS council_district,
+        FI2.infovalue AS sif_district_area,
+        apd.paymentnumber AS paymentnumber,
+        apd.paymentamount AS paymentamount,
+        ab.billnumber AS billnumber,
+        TO_CHAR(apd.dategenerated , 'YYYY-MM-DD"T"HH24:MI:SS') paymentdate,
+        TO_CHAR(apd.dategenerated, 'Month') AS payment_month,
+        CASE 
+            WHEN EXTRACT(MONTH FROM apd.dategenerated) IN (10, 11, 12) THEN 'Q1'
+            WHEN EXTRACT(MONTH FROM apd.dategenerated) IN (1, 2, 3) THEN 'Q2'
+            WHEN EXTRACT(MONTH FROM apd.dategenerated) IN (4, 5, 6) THEN 'Q3'
+            WHEN EXTRACT(MONTH FROM apd.dategenerated) IN (7, 8, 9) THEN 'Q4'
+        END AS payment_quarter,
+        CASE 
+            WHEN EXTRACT(MONTH FROM apd.dategenerated) >= 10 
+                THEN EXTRACT(YEAR FROM apd.dategenerated) + 1
+            ELSE EXTRACT(YEAR FROM apd.dategenerated)
+        END AS payment_fy
+    FROM
+        folder f
+        JOIN folderfreeform ff ON f.folderrsn = ff.folderrsn
+        JOIN accountbill ab ON f.folderrsn = ab.folderrsn
+        JOIN Accountbillfee abf ON abf.folderrsn = ab.folderrsn
+        AND abf.billnumber = ab.billnumber
+        JOIN accountpaymentdetail apd ON apd.folderrsn = ab.folderrsn
+        AND apd.billnumber = ab.Billnumber
+        JOIN accountpayment ap ON apd.folderrsn = ap.folderrsn
+        AND ap.paymentnumber = apd.paymentnumber
+        AND ap.voidflag <> 'Y'
+        JOIN validstatus vs ON f.statuscode = vs.statuscode
+        JOIN folderproperty fp ON f.folderrsn = fp.folderrsn
+        AND f.propertyrsn = fp.propertyrsn
+        JOIN property p ON p.propertyrsn = fp.propertyrsn
+        JOIN propertyinfo pi ON p.propertyrsn = pi.propertyrsn
+        AND pi.propertyinfocode = 55005
+        JOIN FOLDERINFO FI1 ON F.FOLDERRSN = FI1.FOLDERRSN
+        AND FI1.INFOCODE = 84011
+        JOIN FOLDERINFO FI2 ON F.FOLDERRSN = FI2.FOLDERRSN
+        AND FI2.INFOCODE = 84012
+    WHERE
+        f.foldertype = 'SIF'
+    ORDER BY
+        f.folderrsn
+    """,
 }
