@@ -62,6 +62,38 @@ QUERIES = {
         Foldertype
     """,
     "review_time": """
+    WITH
+        pa_first AS (
+            SELECT
+                fp.FOLDERRSN,
+                fp.STARTDATE,
+                fp.ENDDATE,
+                row_number() over (
+                    PARTITION BY
+                        fp.FOLDERRSN
+                    ORDER BY
+                        fp.STARTDATE
+                ) AS rn
+            FROM
+                FOLDERPROCESS fp
+            WHERE
+                fp.PROCESSCODE = 70000
+        ),
+        pe_first AS (
+            SELECT
+                fp.FOLDERRSN,
+                fp.STARTDATE,
+                row_number() over (
+                    PARTITION BY
+                        fp.FOLDERRSN
+                    ORDER BY
+                        fp.STARTDATE
+                ) AS rn
+            FROM
+                FOLDERPROCESS fp
+            WHERE
+                fp.PROCESSCODE = 50680
+        )
     SELECT
         f.CUSTOMFOLDERNUMBER,
         f.FOLDERRSN,
@@ -69,20 +101,19 @@ QUERIES = {
         f.ISSUEDATE,
         pa.STARTDATE AS WEBAPPSTART,
         pa.ENDDATE AS WEBAPPEND,
-        pe.STARTDATE AS EXTEND,
-        fa.ATTEMPTDATE AS DEPT_COMMENTS
+        pe.STARTDATE AS EXTEND
     FROM
         FOLDER f
-        LEFT OUTER JOIN FOLDERPROCESS pa ON f.FOLDERRSN = pa.FOLDERRSN
-        AND pa.PROCESSCODE = 70000
-        LEFT OUTER JOIN FOLDERPROCESS pe ON f.FOLDERRSN = pe.FOLDERRSN
-        AND pe.PROCESSCODE = 50680
-        LEFT OUTER JOIN FOLDERPROCESSATTEMPT fa ON f.FOLDERRSN = fa.FOLDERRSN
+        LEFT JOIN pa_first pa ON f.FOLDERRSN = pa.FOLDERRSN
+        AND pa.rn = 1
+        LEFT JOIN pe_first pe ON f.FOLDERRSN = pe.FOLDERRSN
+        AND pe.rn = 1
     WHERE
-        f.FOLDERTYPE = 'RW'
-        AND f.SUBCODE = 50500
-        AND f.WORKCODE = 50590
-        AND fa.RESULTCODE = 61510
+        (
+            f.FOLDERTYPE = 'RW'
+            AND f.SUBCODE = 50500
+        )
+        OR f.FOLDERTYPE = 'EX'
     """,
     "ex_permits_issued": """
     SELECT
