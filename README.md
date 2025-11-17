@@ -17,7 +17,7 @@ AMANDA is the backend system that underlies the [Austin Build + Connect](https:/
 - `applications_received`: Gets the count of the number of right of way (ROW) permits received by day and folder type.
 - `active_permits`: Gets the current number of active ROW permits by type.
 - `issued_permits`: Gets the count of the number ROW permits issued by day and folder type.
-- `review_time`: Gets a list of dates of different processes of a RW permit's review timeline.
+- `review_time`: Review duration performance metric for ROW permits.  
 - `ex_permits_issued`: Gets the list of EX permits and their indate and issuedate
 - `license_agreements_timeline`: Gets a list of license reviews and a series of dates of review completion dates. 
 - `lde_site_plan_revisions`: Gets a list of land development engineering reviews and key dates for reviews and their due dates.

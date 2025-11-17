@@ -78,42 +78,31 @@ QUERIES = {
                 FOLDERPROCESS fp
             WHERE
                 fp.PROCESSCODE = 70000
-        ),
-        pe_first AS (
-            SELECT
-                fp.FOLDERRSN,
-                fp.STARTDATE,
-                row_number() over (
-                    PARTITION BY
-                        fp.FOLDERRSN
-                    ORDER BY
-                        fp.STARTDATE
-                ) AS rn
-            FROM
-                FOLDERPROCESS fp
-            WHERE
-                fp.PROCESSCODE = 50680
         )
     SELECT
         f.CUSTOMFOLDERNUMBER,
         f.FOLDERRSN,
-        f.INDATE,
-        f.ISSUEDATE,
-        pa.STARTDATE AS WEBAPPSTART,
-        pa.ENDDATE AS WEBAPPEND,
-        pe.STARTDATE AS EXTEND
+        f.FOLDERTYPE,
+        TO_CHAR(f.INDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as INDATE,
+        TO_CHAR(f.ISSUEDATE, 'YYYY-MM-DD"T"HH24:MI:SS') as ISSUEDATE,
+        TO_CHAR(pa.STARTDATE, 'YYYY-MM-DD"T"HH24:MI:SS') AS WEBAPPSTART,
+        TO_CHAR(pa.ENDDATE, 'YYYY-MM-DD"T"HH24:MI:SS') AS WEBAPPEND,
+        f.issuedate - f.indate AS TIME_TO_ISSUANCE,
+        pa.STARTDATE - f.indate AS TIME_TO_REVIEW
     FROM
         FOLDER f
         LEFT JOIN pa_first pa ON f.FOLDERRSN = pa.FOLDERRSN
         AND pa.rn = 1
-        LEFT JOIN pe_first pe ON f.FOLDERRSN = pe.FOLDERRSN
-        AND pe.rn = 1
     WHERE
         (
-            f.FOLDERTYPE = 'RW'
-            AND f.SUBCODE = 50500
+            (
+                f.FOLDERTYPE = 'RW'
+                AND f.SUBCODE = 50500
+            )
+            OR f.FOLDERTYPE = 'EX'
         )
-        OR f.FOLDERTYPE = 'EX'
+        AND f.INDATE >= to_date('10-01-2022', 'mm-dd-yyyy')
+        AND f.ISSUEDATE IS NOT NULL
     """,
     "ex_permits_issued": """
     SELECT

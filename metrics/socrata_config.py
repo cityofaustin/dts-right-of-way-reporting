@@ -24,4 +24,9 @@ DATASETS = {
         "resource_id": "kaw2-pkp2",
         "sodapy_method": "replace",
     },
+    "review_time": {
+        "file_name": "review_time.csv",
+        "resource_id": "bnry-syu9",
+        "sodapy_method": "replace",
+    }
 }
