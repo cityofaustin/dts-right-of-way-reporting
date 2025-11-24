@@ -41,7 +41,7 @@ This subdirectory stores the scripts that processes the data from AMANDA and/or 
 Quick reporting is enabled by setting up an entry in `socrata_config.py`, for a CSV from an AMANDA query that is run against the DB
 in `amanda_to_s3.py`. Once a dataset has been created in Socrata along with the appropriate config, one can update a dataset with:
 
-`python metrics/s3_to_scorata.py --dataset license_agreements_timeline`
+`python metrics/s3_to_socrata.py --dataset license_agreements_timeline`
 
 ### High-level ROW Metrics
 
