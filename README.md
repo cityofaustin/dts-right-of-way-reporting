@@ -17,7 +17,7 @@ AMANDA is the backend system that underlies the [Austin Build + Connect](https:/
 - `applications_received`: Gets the count of the number of right of way (ROW) permits received by day and folder type.
 - `active_permits`: Gets the current number of active ROW permits by type.
 - `issued_permits`: Gets the count of the number ROW permits issued by day and folder type.
-- `review_time`: Gets a list of dates of different processes of a RW permit's review timeline.
+- `review_time`: Review duration performance metric for ROW permits.  
 - `ex_permits_issued`: Gets the list of EX permits and their indate and issuedate
 - `license_agreements_timeline`: Gets a list of license reviews and a series of dates of review completion dates. 
 - `lde_site_plan_revisions`: Gets a list of land development engineering reviews and key dates for reviews and their due dates.
@@ -41,7 +41,7 @@ This subdirectory stores the scripts that processes the data from AMANDA and/or 
 Quick reporting is enabled by setting up an entry in `socrata_config.py`, for a CSV from an AMANDA query that is run against the DB
 in `amanda_to_s3.py`. Once a dataset has been created in Socrata along with the appropriate config, one can update a dataset with:
 
-`python metrics/s3_to_scorata.py --dataset license_agreements_timeline`
+`python metrics/s3_to_socrata.py --dataset license_agreements_timeline`
 
 ### High-level ROW Metrics
 
