@@ -201,7 +201,7 @@ QUERIES = {
     FROM
         folder f
         JOIN folderprocess fp ON fp.FOLDERRSN = f.FOLDERRSN
-            AND fp.PROCESSCODE IN(51212)
+            AND fp.PROCESSCODE IN(51212, 51258, 51259)
         JOIN validprocess vp ON vp.PROCESSCODE = fp.PROCESSCODE
         LEFT JOIN validuser vu ON vu.USERID = fp.ASSIGNEDUSER
         JOIN validprocessstatus vps ON vps.STATUSCODE = fp.STATUSCODE
