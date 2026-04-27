@@ -376,7 +376,7 @@ QUERIES = {
                 JOIN propertyinfo pi ON pi.propertyrsn = f.propertyrsn
                 AND pi.propertyinfocode = 52026 --Propertyinfo-Council District
             WHERE
-                f.foldertype IN ('C8', 'SP', 'ZC', 'PR', 'CC')
+                f.foldertype IN ('C8', 'SP', 'ZC', 'PR', 'CC', 'DA', 'SC')
             GROUP BY
                 f.foldertype,
                 vp.PROCESSDESC,
