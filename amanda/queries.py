@@ -128,6 +128,7 @@ QUERIES = {
         sub.SUBDESC,
         vs.STATUSDESC,
         f.FOLDERCONDITION,
+        vw.WORKDESC,
         TO_CHAR(f.INDATE, 'YYYY-MM-DD"T"HH24:MI:SS') AS INDATE,
         TO_CHAR(web_acceptance.ATTDATE, 'YYYY-MM-DD"T"HH24:MI:SS') AS WEB_APP_ACCEPT_DATE,
         TO_CHAR(payment.ATTDATE, 'YYYY-MM-DD"T"HH24:MI:SS') AS PAYMENT_COMPLETED_DATE,
@@ -150,7 +151,7 @@ QUERIES = {
         LEFT OUTER JOIN (
         SELECT
             fp.FOLDERRSN,
-            min(fpa.ATTEMPTDATE) AS ATTDATE -- Getting latest completed distribution 
+            min(fpa.ATTEMPTDATE) AS ATTDATE -- Getting latest completed distribution
         FROM
             FOLDERPROCESS fp
             LEFT OUTER JOIN FOLDERPROCESSATTEMPT fpa ON fpa.PROCESSRSN = fp.PROCESSRSN
@@ -171,6 +172,7 @@ QUERIES = {
             FOLDERRSN) reviews ON f.FOLDERRSN = reviews.FOLDERRSN
         left outer JOIN VALIDSUB sub on sub.SUBCODE = f.SUBCODE
         left outer JOIN VALIDSTATUS vs on vs.STATUSCODE = f.statuscode
+        left outer JOIN VALIDWORK vw on vw.WORKCODE = f.workcode
     WHERE
         f.FOLDERTYPE in('LM') -- Land Management folder type only
         AND f.STATUSCODE NOT in(56050) -- Remove VOID status
