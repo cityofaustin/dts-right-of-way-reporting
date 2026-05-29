@@ -514,8 +514,7 @@ QUERIES = {
     ORDER BY
         f.folderrsn
     """,
-    "active_contractors":
-    """
+    "active_contractors": """
     SELECT
         TRIM(folder.foldername) AS contractor_name,
         folder.foldercentury || folder.folderyear || '-' || folder.foldersequence || folder.foldertype AS license_number,
@@ -536,5 +535,5 @@ QUERIES = {
         )
     ORDER BY
         contractor_name
-    """
+    """,
 }
