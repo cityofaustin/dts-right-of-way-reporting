@@ -514,4 +514,27 @@ QUERIES = {
     ORDER BY
         f.folderrsn
     """,
+    "active_contractors":
+    """
+    SELECT
+        TRIM(folder.foldername) AS contractor_name,
+        folder.foldercentury || folder.folderyear || '-' || folder.foldersequence || folder.foldertype AS license_number,
+        TRUNC(folder.issuedate) AS issue_date,
+        TRUNC(folder.expirydate) AS expiration_date,
+        TRUNC(folderinfo.infovaluedatetime) AS issuance_expiration
+    FROM
+        folder,
+        folderinfo
+    WHERE
+        (folder.foldertype = 'LC')
+        AND (folder.issuedate IS NOT NULL)
+        AND (folder.expirydate IS NOT NULL)
+        AND FOLDER.STATUSCODE = 50010
+        AND (
+            folderinfo.folderrsn = folder.folderrsn
+            AND folderinfo.infocode = 75350
+        )
+    ORDER BY
+        contractor_name
+    """
 }
