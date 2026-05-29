@@ -520,7 +520,7 @@ QUERIES = {
         folder.foldercentury || folder.folderyear || '-' || folder.foldersequence || folder.foldertype AS license_number,
         TRUNC(folder.issuedate) AS issue_date,
         TRUNC(folder.expirydate) AS expiration_date,
-        TRUNC(folderinfo.infovaluedatetime) AS issuance_expiration
+        TRUNC(folderinfo.infovaluedatetime) AS insurance_expiration
     FROM
         folder,
         folderinfo
