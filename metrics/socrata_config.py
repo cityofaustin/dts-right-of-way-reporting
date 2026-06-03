@@ -28,5 +28,10 @@ DATASETS = {
         "file_name": "review_time.csv",
         "resource_id": "bnry-syu9",
         "sodapy_method": "replace",
-    }
+    },
+    "active_contractors": {
+        "file_name": "active_contractors.csv",
+        "resource_id": "8d92-wsiw",
+        "sodapy_method": "replace",
+    },
 }
