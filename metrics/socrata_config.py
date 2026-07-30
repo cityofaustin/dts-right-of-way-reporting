@@ -34,4 +34,9 @@ DATASETS = {
         "resource_id": "8d92-wsiw",
         "sodapy_method": "replace",
     },
+    "license_agreements": {
+        "file_name": "license_agreements.csv",
+        "resource_id": "6xns-92q8",
+        "sodapy_method": "replace",
+    }
 }
