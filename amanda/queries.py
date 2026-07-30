@@ -579,53 +579,157 @@ QUERIES = {
                  ORDER BY
                    fpr.propertyrsn
                  ) AS property_details,
-       coa_folder.f_get_info_string(f.folderrsn, 50966) AS smart_housing_project,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 50966)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS smart_housing_project,
        coa_folder.f_get_info_string(f.folderrsn, 51165) AS subdivision_name,
        coa_folder.f_get_info_string(f.folderrsn, 51168) AS subdivision_recording_number,
        coa_folder.f_get_info_string(f.folderrsn, 51511) AS sponsoring_department,
-       coa_folder.f_get_info_string(f.folderrsn, 51632) AS is_dedication_easement_in_row,
-       coa_folder.f_get_info_string(f.folderrsn, 51640) AS travis_county_row,
-       coa_folder.f_get_info_string(f.folderrsn, 51645) AS txdot_row,
-       coa_folder.f_get_info_string(f.folderrsn, 51650) AS in_coa_parkland,
-       coa_folder.f_get_info_string(f.folderrsn, 51665) AS existing_site_plan,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 51632)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS is_dedication_easement_in_row,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 51640)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS travis_county_row,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 51645)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS txdot_row,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 51650)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS in_coa_parkland,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 51665)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS existing_site_plan,
        coa_folder.f_get_info_string(f.folderrsn, 51671) AS existing_site_plan_case_not,
-       coa_folder.f_get_info_string(f.folderrsn, 51676) AS texas_walk_of_star_area,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 51676)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS texas_walk_of_star_area,
        TO_CHAR(coa_folder.f_get_info_date(f.folderrsn, 57035), 'YYYY-MM-DD"T"HH24:MI:SS') AS pc_hearing_date,
        TO_CHAR(coa_folder.f_get_info_date(f.folderrsn, 57037), 'YYYY-MM-DD"T"HH24:MI:SS') AS utc_hearing_date,
        coa_folder.f_get_info_string(f.folderrsn, 57042) AS new_easement_dedication_required,
        TO_CHAR(coa_folder.f_get_info_date(f.folderrsn, 57044), 'YYYY-MM-DD"T"HH24:MI:SS') AS legal_review_date,
        coa_folder.f_get_info_string(f.folderrsn, 57045) AS new_easement_dedication_required,
        coa_folder.f_get_info_string(f.folderrsn, 61595) AS physical_address,
-       coa_folder.f_get_info_string(f.folderrsn, 76366) AS license_agreement_termination,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76366)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS license_agreement_termination,
        coa_folder.f_get_info_string(f.folderrsn, 76372) AS la_file_number_termination,
        coa_folder.f_get_info_string(f.folderrsn, 76374) AS la_file_number_amendment,
        coa_folder.f_get_info_string(f.folderrsn, 76376) AS appraisal_district_geoid_no,
-       coa_folder.f_get_info_string(f.folderrsn, 76649) AS tower_crane,
-       coa_folder.f_get_info_string(f.folderrsn, 76708) AS tie_back_retention,
-       coa_folder.f_get_info_string(f.folderrsn, 76101) AS survey,
-       coa_folder.f_get_info_string(f.folderrsn, 76102) AS improvement_in_easement,
-       coa_folder.f_get_info_string(f.folderrsn, 76104) AS aulcc_required,
-       coa_folder.f_get_info_string(f.folderrsn, 76113) AS landowner_approval,
-       coa_folder.f_get_info_string(f.folderrsn, 76124) AS central_business_district_cbd,
-       coa_folder.f_get_info_string(f.folderrsn, 76127) AS historical_land_commission_approved,
-       coa_folder.f_get_info_string(f.folderrsn, 76128) AS owners_recorded_deed,
-       coa_folder.f_get_info_string(f.folderrsn, 76136) AS improvements_to_be_installed_in_row,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76649)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS tower_crane,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76708)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS tie_back_retention,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76101)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS survey,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76102)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS improvement_in_easement,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76104)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS aulcc_required,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76113)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS landowner_approval,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76124)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS central_business_district_cbd,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76127)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS historical_land_commission_approved,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76128)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS owners_recorded_deed,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76136)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS improvements_to_be_installed_in_row,
        coa_folder.f_get_info_string(f.folderrsn, 76137) AS county_clerk_recordation_no,
        coa_folder.f_get_info_string(f.folderrsn, 76139) AS govt_non_coa_app_type,
-       coa_folder.f_get_info_string(f.folderrsn, 76145) AS historical_zoning,
-       coa_folder.f_get_info_string(f.folderrsn, 76146) AS historic_zoning_district,
-       coa_folder.f_get_info_string(f.folderrsn, 79759) AS subdivision_case,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76145)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS historical_zoning,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 76146)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS historic_zoning_district,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79759)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS subdivision_case,
        coa_folder.f_get_info_string(f.folderrsn, 79760) AS subdivision_case_no,
-       coa_folder.f_get_info_string(f.folderrsn, 79761) AS zoning_case,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79761)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS zoning_case,
        coa_folder.f_get_info_string(f.folderrsn, 79762) AS purposeof_release_easement,
-       coa_folder.f_get_info_string(f.folderrsn, 79764) AS existing_infrastructure_within_easement,
-       coa_folder.f_get_info_string(f.folderrsn, 79765) AS is_property_subdivided,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79764)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS existing_infrastructure_within_easement,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79765)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS is_property_subdivided,
        coa_folder.f_get_info_string(f.folderrsn, 79766) AS full_or_partial_releaseof_easement,
        coa_folder.f_get_info_string(f.folderrsn, 79767) AS size_of_easement_track_released,
        coa_folder.f_get_info_string(f.folderrsn, 79768) AS acres_or_sqft,
-       coa_folder.f_get_info_string(f.folderrsn, 79769) AS was_easement_dedicated_plats,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79769)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS was_easement_dedicated_plats,
        coa_folder.f_get_info_string(f.folderrsn, 79770) AS plat_recording_number_easement,
-       coa_folder.f_get_info_string(f.folderrsn, 79771) AS was_separate_instrument,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79771)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS was_separate_instrument,
        coa_folder.f_get_info_string(f.folderrsn, 79772) AS separate_instrument_recording_number,
        coa_folder.f_get_info_string(f.folderrsn, 79773) AS name_of_development_project,
        coa_folder.f_get_info_string(f.folderrsn, 79774) AS owner_or_entity_type,
@@ -633,23 +737,51 @@ QUERIES = {
        coa_folder.f_get_info_string(f.folderrsn, 77935) AS zoning_case_number,
        coa_folder.f_get_info_string(f.folderrsn, 79220) AS site_plan_id,
        coa_folder.f_get_info_string(f.folderrsn, 79720) AS lm_request_type,
-       coa_folder.f_get_info_string(f.folderrsn, 79723) AS is_area_vacated_public_row,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79723)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS is_area_vacated_public_row,
        coa_folder.f_get_info_string(f.folderrsn, 79725) AS purpose_of_vacation,
-       coa_folder.f_get_info_string(f.folderrsn, 79726) AS is_project_unified_development,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79726)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS is_project_unified_development,
        coa_folder.f_get_info_string(f.folderrsn, 79727) AS project_type,
        TO_CHAR(coa_folder.f_get_info_date(f.folderrsn, 79728),
                'YYYY-MM-DD"T"HH24:MI:SS') AS proposed_construction_start_date,
-       coa_folder.f_get_info_string(f.folderrsn, 79730) AS adjacent_property_developed,
-       coa_folder.f_get_info_string(f.folderrsn, 79731) AS utility_lines_to_be_vacated,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79730)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS adjacent_property_developed,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79731)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS utility_lines_to_be_vacated,
        coa_folder.f_get_info_string(f.folderrsn, 79735) AS existing_parking_facilities,
        coa_folder.f_get_info_string(f.folderrsn, 79741) AS ownership_deed_numbers,
        coa_folder.f_get_info_string(f.folderrsn, 79742) AS ownership_deed_dates,
        coa_folder.f_get_info_string(f.folderrsn, 79743) AS ownership_deed_county,
        coa_folder.f_get_info_string(f.folderrsn, 79745) AS row_dedication_recording_number,
-       coa_folder.f_get_info_string(f.folderrsn, 79748) AS city_purchased_vacated_area,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79748)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS city_purchased_vacated_area,
        coa_folder.f_get_info_string(f.folderrsn, 79749) AS citys_deed_recording_number,
-       coa_folder.f_get_info_string(f.folderrsn, 79751) AS area_vacated_functional_row,
-       coa_folder.f_get_info_string(f.folderrsn, 79752) AS area_vacated_on_paper_only
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79751)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS area_vacated_functional_row,
+       CASE coa_folder.f_get_info_string(f.folderrsn, 79752)
+         WHEN 'Yes' THEN 'TRUE'
+         WHEN 'No' THEN 'FALSE'
+         ELSE NULL
+         END AS area_vacated_on_paper_only
     FROM folder F
            LEFT JOIN folderproperty fpr ON f.folderrsn = fpr.folderrsn
            INNER JOIN property pr ON pr.propertyrsn = fpr.propertyrsn
