@@ -1,10 +1,20 @@
-# Socrata aka City datahub
-CSR_DATASET=
-CSR_ENDPOINT=
-SO_KEY=
-SO_SECRET=
-SO_TOKEN=
-SO_WEB=
+# Socrata aka City datahub (1pass: "Socrata Key ID, Secret, and Token")
+SO_KEY=<apiKeyId>
+SO_SECRET=<apiKeySecret>
+SO_TOKEN=<appToken>
+SO_WEB=<endpoint>
+
+# AWS S3 (1pass: "Executive Dashboard")
+EXEC_DASH_ACCESS_ID=<AWS Access Key>
+EXEC_DASH_PASS=<AWS Secret Access Key>
+BUCKET_NAME=<Bucket>
+
+# AMANDA (1pass: "Amanda Read-Only (RO) replica database")
+HOST=<host>
+PORT=<port>
+SERVICE_NAME=<service>
+DB_USER=<username>
+DB_PASS=<password>
 
 # Socrata Dataset IDs
 WEEK_DATASET=ij2v-mrv3
@@ -12,21 +22,9 @@ ACTIVE_DATASET=hyc6-zz9w
 PRIORITY_DATASET=cavh-ec9p
 SEGMENT_DATASET=nt54-hvix
 
-# Smartsheet
-SMARTSHEET_ACCESS_TOKEN=
+# Smartsheet (1pass: "Smartsheet API Key")
+SMARTSHEET_ACCESS_TOKEN=<password>
 
-# AWS 
-EXEC_DASH_ACCESS_ID=
-EXEC_DASH_PASS=
-BUCKET_NAME=
-
-# AMANDA RR DB
-HOST=
-PORT=
-SERVICE_NAME=
-DB_USER=
-DB_PASS=
-
-# ArcGIS Online
-AGOL_USERNAME=
-AGOL_PASSWORD=
+# ArcGIS Online (1pass: "ArcGIS Online (AGOL) Scripts Publisher")
+AGOL_USERNAME=<username>
+AGOL_PASSWORD=<password>
