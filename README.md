@@ -74,16 +74,16 @@ to rank permits based on a prioritization for ROW inspectors. Loads data from cs
 
 ## Docker
 
-This repo can be used with a docker container. You can either build it yourself with:
+This repo can be used with a docker container. You can build it yourself with:
 
-`docker build . -t atddocker/dts-right-of-way-reporting:local`
-
-or pull from our dockerhub account:
-
-`docker pull atddocker/dts-right-of-way-reporting:production`
+```bash
+docker build . -t atddocker/dts-right-of-way-reporting:local
+```
 
 Then, provide the environment variables described in env_template to the docker image:
 
-`docker run -it --env-file env_file -v "$(pwd):/app" atddocker/dts-right-of-way-reporting:production /bin/bash` 
+```bash
+docker run -it --env-file env_file atddocker/dts-right-of-way-reporting:local /bin/bash
+```
 
 Then, provide the command you would like to run.
