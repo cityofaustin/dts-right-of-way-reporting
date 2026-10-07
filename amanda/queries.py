@@ -579,6 +579,10 @@ QUERIES = {
                  ORDER BY
                    fpr.propertyrsn
                  ) AS property_details,
+       LISTAGG(pr.propgisid1, ',' ON OVERFLOW TRUNCATE '...')
+               WITHIN GROUP (ORDER BY fpr.propertyrsn) AS propgisid1,
+       LISTAGG(pr.propcode, ',' ON OVERFLOW TRUNCATE '...')
+               WITHIN GROUP (ORDER BY fpr.propertyrsn) AS propcode,
        CASE coa_folder.f_get_info_string(f.folderrsn, 50966)
          WHEN 'Yes' THEN 'TRUE'
          WHEN 'No' THEN 'FALSE'
