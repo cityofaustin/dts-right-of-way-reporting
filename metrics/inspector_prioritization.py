@@ -66,7 +66,7 @@ def duration_scoring(row):
         duration_column = "WZ_DURATION"
         start = row["ISSUE_DATE"]
     if row["FOLDERTYPE"] == "EX":
-        if row["EXTENSION_START_DATE"] and row["EXTENSION_END_DATE"]:
+        if not pd.isna(row["EXTENSION_START_DATE"]) and not pd.isna(row["EXTENSION_END_DATE"]):
             start = row["EXTENSION_START_DATE"]
             start_dt = pd.to_datetime(start)
             end_dt = pd.to_datetime(row["EXTENSION_END_DATE"])
